@@ -3,19 +3,24 @@ import ray
 from ray.rllib.algorithms.sac import SACConfig
 
 def train_sac_ray(env, workers, gpus, timesteps):
-    # Create and configure the SAC algorithm using the new API stack.
     config = (
         SACConfig()
-        .environment(env=env)  # specify the environment
-        .env_runners(num_envs_per_env_runner=workers)  # replace deprecated rollouts call
+        .environment(env=env)
+        .env_runners(num_envs_per_env_runner=workers)
         .resources(num_gpus=gpus)
-        .training(train_batch_size=256)  # adjust as needed
+        .training(train_batch_size=256)
+        .evaluation(
+            evaluation_interval=1,
+            evaluation_duration=1,
+            evaluation_duration_unit="episodes",
+            evaluation_config={"explore": False}
+        )
     )
-    algo = config.build()
+    algo = config.build_algo()  # or .build() if you prefer (though build_algo is preferred now)
 
-    # Training loop
     for i in range(timesteps):
         result = algo.train()
+        # Now, evaluation metrics should be present.
         print(f"Iteration {i}: reward: {result.get('episode_reward_mean', 'N/A')}")
     algo.stop()
 

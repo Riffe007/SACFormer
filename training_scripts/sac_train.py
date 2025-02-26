@@ -1,36 +1,72 @@
+import os
+import sys
+import argparse
 import gymnasium as gym
-import torch
-import numpy as np
-from SACFormer.agents.sac_agent import SACAgent
 
-def train_sac(env_name="HalfCheetah-v4", episodes=1000, batch_size=256):
-    env = gym.make(env_name)
-    state_dim = env.observation_space.shape[0]
-    action_dim = env.action_space.shape[0]
+# Add the parent directory to sys.path so we can import our agents
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-    agent = SACAgent(state_dim, action_dim)
-    returns = []
+from agents.sac_agent import SACAgent  # Adjusted import
+# (Import other necessary modules here, e.g., torch if needed)
 
-    for episode in range(episodes):
-        state, _ = env.reset()
-        total_reward = 0
+def record_episode(agent, env_name, video_dir, seed=42):
+    """
+    Records a single episode using Gymnasium's RecordVideo wrapper.
+    """
+    from gymnasium.wrappers import RecordVideo
 
-        for _ in range(1000):  # Max episode length
-            action = agent.select_action(state)
-            next_state, reward, done, _, _ = env.step(action)
+    os.makedirs(video_dir, exist_ok=True)
+    # Create the environment with render_mode="rgb_array"
+    env = gym.make(env_name, render_mode="rgb_array")
+    env = RecordVideo(env, video_folder=video_dir, name_prefix="episode")
+    state, info = env.reset(seed=seed)
+    done = False
+    total_reward = 0
+    while not done:
+        # Use deterministic actions for a stable video.
+        action = agent.select_action(state, deterministic=True)
+        state, reward, done, truncated, info = env.step(action)
+        total_reward += reward
+        done = done or truncated
+    env.close()
+    print(f"Recorded episode video saved in {video_dir}. Total reward: {total_reward}")
 
-            agent.replay_buffer.add(state, action, reward, next_state, done)
-            state = next_state
-            total_reward += reward
 
-            if len(agent.replay_buffer.states) > batch_size:
-                agent.update(batch_size)
+def main():
+    parser = argparse.ArgumentParser(description="Train SAC agent and record an episode.")
+    parser.add_argument("--env", type=str, default="HalfCheetah-v5", help="Environment name.")
+    parser.add_argument("--episodes", type=int, default=1000, help="Number of training episodes.")
+    parser.add_argument("--video_dir", type=str, default="videos", help="Directory to save recorded videos.")
+    # Add other hyperparameters as needed.
+    args = parser.parse_args()
 
-            if done:
-                break
+    # Initialize your SAC agent (ensure your SACAgent's __init__ signature is correct).
+    # This example assumes your agent handles its own replay buffer etc.
+    # You may need to adjust parameters as per your implementation.
+    agent = SACAgent(
+        state_dim=17,  # Example value for HalfCheetah
+        action_dim=6,
+        hidden_dim=256,
+        gamma=0.99,
+        tau=0.005,
+        alpha=0.2,
+        lr=3e-4,
+        buffer_size=1_000_000,
+        batch_size=256
+    )
+    print("Initialized SACAgent.")
 
-        returns.append(total_reward)
-        print(f"Episode {episode}: Reward {total_reward}")
+    # Dummy training loop (replace with your actual training loop)
+    for ep in range(args.episodes):
+        # Assume your training loop runs here, updates the agent, etc.
+        # For example:
+        print(f"Training episode {ep+1}/{args.episodes}...")
+        # agent.train_one_episode()  <-- your training step
+        # (You can log rewards, losses, etc.)
+    
+    # After training, record an evaluation episode
+    print("Recording evaluation episode...")
+    record_episode(agent, args.env, args.video_dir)
 
 if __name__ == "__main__":
-    train_sac()
+    main()
