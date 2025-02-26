@@ -14,20 +14,21 @@ def record_eval_episode(agent, env_name, video_dir, eval_ep, seed=42):
     """
     Records a single evaluation episode using Gymnasium's RecordVideo wrapper.
     
-    The environment is created with render_mode="rgb_array" so that frames are captured.
-    A unique name prefix (including the evaluation episode number) is used to avoid overwriting.
+    The environment is created with render_mode="rgb_array" to capture frames.
+    A unique name prefix (based on the evaluation episode number) is used
+    so that each video is saved without overwriting previous ones.
     """
     from gymnasium.wrappers import RecordVideo
 
     os.makedirs(video_dir, exist_ok=True)
-    # Create the environment with rendering enabled.
+    # Create a new environment for recording with rendering enabled.
     env = gym.make(env_name, render_mode="rgb_array")
-    # Use a unique name prefix so that each evaluation video gets its own file.
+    # Record every episode by forcing the episode_trigger to always return True.
     env = RecordVideo(
         env,
         video_folder=video_dir,
-        name_prefix=f"eval_ep{eval_ep}_",
-        episode_trigger=lambda ep: True  # Always record the episode.
+        name_prefix=f"episode_{eval_ep}_",
+        episode_trigger=lambda ep: True
     )
     state, _ = env.reset(seed=seed)
     done = False
@@ -53,11 +54,10 @@ def train():
     parser.add_argument("--buffer_size", type=int, default=1_000_000, help="Replay buffer size.")
     parser.add_argument("--num_envs", type=int, default=4, help="Number of parallel environments.")
     parser.add_argument("--seed", type=int, default=42, help="Random seed.")
-    parser.add_argument("--log_dir", type=str, default="logs", help="Directory for logs and model checkpoints.")
+    parser.add_argument("--log_dir", type=str, default="logs", help="Directory for logs and checkpoints.")
     parser.add_argument("--wandb_project", type=str, default="SAC_Training", help="W&B project name.")
     parser.add_argument("--save_interval", type=int, default=100, help="Save model checkpoint every N episodes.")
-    # Evaluation video recording every eval_interval episodes.
-    parser.add_argument("--eval_interval", type=int, default=1000, help="Record evaluation video every N episodes.")
+    # Remove eval_interval since we record every episode.
     parser.add_argument("--video_dir", type=str, default="videos", help="Directory to save evaluation videos.")
     args = parser.parse_args()
 
@@ -71,7 +71,7 @@ def train():
     os.makedirs(args.log_dir, exist_ok=True)
     wandb.init(project=args.wandb_project, config=args, name=f"SAC_{args.env}")
 
-    # Create vectorized training environment.
+    # Create the vectorized training environment.
     env = make_vec_env(args.env, num_envs=args.num_envs, seed=args.seed)
     states, _ = env.reset()  # Unpack to get observations only.
     state_dim = states.shape[1]
@@ -121,14 +121,13 @@ def train():
         print(f"Episode {episode + 1}/{args.episodes} - Avg Reward: {avg_reward:.2f}")
 
         if (episode + 1) % args.save_interval == 0:
-            model_path = os.path.join(args.log_dir, f"sac_{args.env}_ep{episode+1}.pth")
+            model_path = os.path.join(args.log_dir, f"sac_{args.env}_ep{episode + 1}.pth")
             torch.save(agent.actor.state_dict(), model_path)
             print(f"[Checkpoint] Saved model at {model_path}")
 
-        # Record an evaluation video every eval_interval episodes.
-        if (episode + 1) % args.eval_interval == 0:
-            print("Recording evaluation episode...")
-            record_eval_episode(agent, args.env, args.video_dir, eval_ep=episode+1, seed=args.seed)
+        # Record an evaluation video for every episode.
+        print("Recording evaluation episode video...")
+        record_eval_episode(agent, args.env, args.video_dir, eval_ep=episode + 1, seed=args.seed)
 
     env.close()
     wandb.finish()
