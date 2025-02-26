@@ -1,0 +1,18 @@
+import torch
+import os
+from agents.sac_agent import SACAgent
+
+# Ensure directory exists
+model_dir = "models"
+os.makedirs(model_dir, exist_ok=True)
+model_path = os.path.join(model_dir, "sac_halfcheetah.pth")
+
+# Initialize a dummy SAC agent (adjust state_dim and action_dim as needed)
+state_dim = 17  # HalfCheetah observation space
+action_dim = 6  # HalfCheetah action space
+agent = SACAgent(state_dim, action_dim)
+
+# Save the model
+torch.save(agent.actor.state_dict(), model_path)
+
+print(f"Model saved at {model_path}")
