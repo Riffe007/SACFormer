@@ -1,15 +1,59 @@
-# SACFormer
-Soft Actor-Critic (SAC) with Transformers in Gymnasium & MuJoCo
+# 🚀 SACFormer: Soft Actor-Critic with Transformers in MuJoCo & Gymnasium
+A modern Reinforcement Learning (RL) framework using Soft Actor-Critic (SAC) with Transformer-based policies for MuJoCo physics simulations. Designed for multi-GPU training, efficient experience replay, and scalable parallel execution.
 
-📌 Overview
+# 📌 Features
+    ✅ SAC-Based RL – Uses Soft Actor-Critic for optimal policy learning.
+    ✅ Transformer-Based Actor – Replaces MLP with self-attention for better sequential decision-making.
+    ✅ MuJoCo + Gymnasium – High-quality physics simulations for realistic training.
+    ✅ Multi-GPU Training – Supports distributed RL training via Ray RLlib.
+    ✅ Vectorized Environments – Uses Stable-Baselines3 VecEnv for fast rollouts.
+    ✅ Prioritized Experience Replay (PER) – Smart sampling for faster, efficient learning.
+    ✅ TensorBoard & Weights & Biases (WandB) Integration – Real-time monitoring & logging.
 
-This project implements a modern Soft Actor-Critic (SAC) reinforcement learning agent powered by Transformers instead of traditional MLPs, running on MuJoCo environments (Gymnasium). It is optimized for multi-GPU training, efficient experience replay, and parallelized execution.
+# 💾 Installation Guide
+Follow these steps to clone, install dependencies, and run the project.
 
-🚀 Features
+## Step 1: Clone the Repository
+```bash
+git clone https://github.com/Riffe007/SACFormer.git
+cd SACFormer
+```
+## Step 2: Create a Virtual Environment (Optional but Recommended)
+```bash
+python -m venv sac-env
+source sac-env/bin/activate  # MacOS/Linux
+sac-env\Scripts\activate     # Windows
+```
+## Step 3: Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+Alternatively, install core dependencies manually:
 
-✅ SAC-Based RL – Uses Soft Actor-Critic for optimal policy learning.✅ Transformer-Based Actor – Replaces MLP with self-attention for better sequential decision-making.✅ MuJoCo + Gymnasium – High-quality physics simulations for better training.✅ Multi-GPU Training – Supports distributed learning with Ray RLlib.✅ Vectorized Environments – Stable-Baselines3 VecEnv for faster rollouts.✅ Prioritized Experience Replay (PER) – Smart sampling for efficient learning.✅ TensorBoard & WandB Integration – Real-time monitoring & hyperparameter tuning.
+```bash
+pip install torch stable-baselines3[extra] gymnasium mujoco ray rllib numpy wandb
+```
+## Step 4: Verify Installation
+Check that dependencies installed correctly:
 
-📂 Directory Structure
+```bash
+python -c "import torch; import gymnasium; import mujoco; import stable_baselines3; print('✅ Installation successful!')"
+```
+# 🛠️ Usage: Running the Training
+Train SAC with Transformers on HalfCheetah
+```bash
+python training_scripts/sac_train.py
+```
+Run Parallel Training with Ray RLlib
+```bash
+python training_scripts/sac_ray_train.py
+```
+Perform Automated Hyperparameter Tuning
+```bash
+python training_scripts/sac_hyperparam_search.py
+```
+# 📂 Directory Structure
+
 ```plaintext
 SAC-Transformer-RL/
 │── agents/                     # SAC Agent & Models
@@ -30,7 +74,7 @@ SAC-Transformer-RL/
 │   ├── config.py                # Hyperparameter Storage
 │   ├── utils.py                 # Common Utilities
 │
-│── training_scripts/            # Different Training Variants
+│── training_scripts/            # Training Variants
 │   ├── sac_train.py             # Standard SAC Training
 │   ├── sac_ray_train.py         # Multi-GPU Training with Ray
 │   ├── sac_hyperparam_search.py # Auto Hyperparameter Tuning
@@ -44,65 +88,46 @@ SAC-Transformer-RL/
 │── requirements.txt              # Dependencies
 │── train.py                      # Main Entry Point
 ```
-💾 Installation
 
-pip install torch stable-baselines3[extra] gymnasium mujoco ray rllib numpy wandb
+```markdown
+## 🔬 Improvements Over Previous Implementations
 
-🛠️ Usage
+| **Old ARS Project**             | **New SAC-Transformer Project**         |
+|----------------------------------|-----------------------------------------|
+| Augmented Random Search (ARS)   | ✅ Soft Actor-Critic (SAC)              |
+| PyBullet Environments           | ✅ MuJoCo + Gymnasium                   |
+| No GPU Support                  | ✅ Multi-GPU (Ray RLlib)                |
+| Manual Policy Updates (NumPy)   | ✅ Transformer-Based Actor-Critic       |
+| No Parallelization              | ✅ Vectorized Environments (VecEnv)     |
+| Basic Replay Buffer             | ✅ Prioritized Experience Replay (PER)  |
+| Minimal Logging                 | ✅ TensorBoard + WandB                  |
+```
+## 🔮 Future Plans
+## 🚀 Upcoming Enhancements:
 
-Train SAC with Transformers on HalfCheetah-v4:
+    🔹 Meta-RL Support (Memory-Augmented Networks).
+    🔹 GATO & Decision Transformer experiments.
+    🔹 Optimized JAX version for TPU acceleration.
+    🔹 Multi-Agent RL support.
+# 💡 Why This is the Best Modern RL Setup
+    ✅ State-of-the-Art RL (SAC + Transformers)
+    ✅ High-Quality Physics (MuJoCo)
+    ✅ Parallel Training (Ray RLlib)
+    ✅ Production-Ready Code
 
-python training_scripts/sac_train.py
+# 🔥 This framework is built for RL research and real-world deployment. 🚀
 
-Run parallel training with Ray RLlib:
+# 🤝 Contributing
+Contributions are welcome! If you’d like to improve the repo:
 
-python training_scripts/sac_ray_train.py
+1. Fork the project
+2. Create a new branch
+3. Commit your changes
+4. Push to your branch and submit a PR
+# 📜 License
+This project is licensed under the MIT License.
 
-Perform automated hyperparameter tuning:
-
-python training_scripts/sac_hyperparam_search.py
-
-🔬 Improvements Over Old Repo
-
-Old ARS Project
-
-New SAC-Transformer Project
-
-Augmented Random Search (ARS)
-
-✅ Soft Actor-Critic (SAC)
-
-PyBullet Environments
-
-✅ MuJoCo + Gymnasium
-
-No GPU Support
-
-✅ Multi-GPU (Ray RLlib)
-
-Manual Policy Updates (NumPy)
-
-✅ Transformer-Based Actor-Critic
-
-No Parallelization
-
-✅ Vectorized Environments (VecEnv)
-
-Basic Replay Buffer
-
-✅ Prioritized Experience Replay (PER)
-
-Minimal Logging
-
-✅ TensorBoard + WandB
-
-🔮 Future Plans
-
-🔹 Add Meta-RL support (Memory-Augmented Networks).🔹 Experiment with GATO / Decision Transformer.🔹 Optimize JAX version for TPU acceleration.
-
-💡 Why This is the Best Modern RL Setup
-
-✅ State-of-the-Art RL (SAC + Transformers)✅ High-Quality Physics (MuJoCo)✅ Parallel Training (Ray RLlib)✅ Production-Ready Code
-
-🔥 This framework is built for RL research and deployment. 🚀
+# 📩 Contact & Support
+For issues, open a GitHub issue or reach out via email:
+✉️ techavenger83@gmail.com
 
